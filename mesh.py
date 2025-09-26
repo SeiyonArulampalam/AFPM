@@ -20,6 +20,7 @@ class AFPM_Mesh_12S5PP:
         back_iron_thickness,
         mesh_refinement,
         npts_airgap,
+        gmsh_popup,
     ):
         self.total_length = total_length  # Total slice length
         self.airgap = airgap
@@ -32,6 +33,7 @@ class AFPM_Mesh_12S5PP:
         self.back_iron_thickness = back_iron_thickness
         self.mesh_refinement = mesh_refinement
         self.npts_airgap = npts_airgap
+        self.gmsh_popup = gmsh_popup
 
         # Raise exceptions for invalid geometru
         if magnet_length >= (total_length / 10.0):
@@ -830,7 +832,7 @@ class AFPM_Mesh_12S5PP:
         elemTags, conn = gmsh.model.mesh.getElementsByType(elementType)
         orientation.check_areas(X, conn, len(elemTags))
 
-        if "-nopopup" not in sys.argv:
+        if self.gmsh_popup:
             gmsh.fltk.run()
 
         gmsh.finalize()
@@ -1098,7 +1100,7 @@ class AFPM_Mesh_12S5PP:
         elemTags, conn = gmsh.model.mesh.getElementsByType(elementType)
         orientation.check_areas(X, conn, len(elemTags))
 
-        if "-nopopup" not in sys.argv:
+        if self.gmsh_popup:
             gmsh.fltk.run()
 
         gmsh.finalize()
@@ -1365,7 +1367,7 @@ class AFPM_Mesh_12S5PP:
         elemTags, conn = gmsh.model.mesh.getElementsByType(elementType)
         orientation.check_areas(X, conn, len(elemTags))
 
-        if "-nopopup" not in sys.argv:
+        if self.gmsh_popup:
             gmsh.fltk.run()
 
         gmsh.finalize()
@@ -1383,8 +1385,9 @@ mesh = AFPM_Mesh_12S5PP(
     back_iron_thickness=3,
     mesh_refinement=2e-1,
     npts_airgap=100,
+    gmsh_popup=True,
 )
 
 # mesh.stator()
 # mesh.outter_rotor()
-mesh.inner_rotor()
+# mesh.inner_rotor()
