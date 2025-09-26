@@ -1,2 +1,5 @@
 *.inp
 __pycache__/
+*.png
+*.gif
+*.jpg

@@ -835,6 +835,8 @@ class AFPM_Mesh_12S5PP:
         if self.gmsh_popup:
             gmsh.fltk.run()
 
+        gmsh.write("stator.inp")
+
         gmsh.finalize()
 
     def outter_rotor(self):
@@ -1103,6 +1105,8 @@ class AFPM_Mesh_12S5PP:
         if self.gmsh_popup:
             gmsh.fltk.run()
 
+        gmsh.write("outter_rotor.inp")
+
         gmsh.finalize()
 
     def inner_rotor(self):
@@ -1370,6 +1374,7 @@ class AFPM_Mesh_12S5PP:
         if self.gmsh_popup:
             gmsh.fltk.run()
 
+        gmsh.write("inner_rotor.inp")
         gmsh.finalize()
 
 
@@ -1381,13 +1386,13 @@ mesh = AFPM_Mesh_12S5PP(
     bell_width=2.5,
     tooth_width=1.5,
     magnet_length=3.0,
-    magnet_thickness=5,
-    back_iron_thickness=3,
+    magnet_thickness=2,
+    back_iron_thickness=1.0,
     mesh_refinement=2e-1,
     npts_airgap=100,
-    gmsh_popup=True,
+    gmsh_popup=False,
 )
 
-# mesh.stator()
-# mesh.outter_rotor()
-# mesh.inner_rotor()
+mesh.stator()
+mesh.outter_rotor()
+mesh.inner_rotor()
