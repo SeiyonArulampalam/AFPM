@@ -3,7 +3,7 @@ import sys
 from utils import orientation
 
 gmsh.initialize()
-gmsh.model.add("inner_rotor")
+gmsh.model.add("stator")
 lc = 1e-1
 
 # Dimensions
@@ -16,6 +16,7 @@ tw = 1.5  # Tooth width
 a = 0.5 * (bw - tw)  # Shoe over hang
 c = (L - 12 * bw) / 12  # Slot opening between teeth
 t_ag = 2  # airgap thickness
+npts_airgap = 100  # Number of points along the airgap mesh
 
 start = tw * 0.5
 gmsh.model.geo.addPoint(start, Sh * 0.5, 0, lc, 1)
@@ -205,10 +206,10 @@ gmsh.model.geo.addPoint(
     start + 23 * a + 11 * c + 11 * tw + offset, -Sh * 0.5, 0, lc, 172
 )
 
-gmsh.model.geo.addPoint(0, 0.5 * Sh + tt + t_ag, 0, lc, 173)
-gmsh.model.geo.addPoint(L, 0.5 * Sh + tt + t_ag, 0, lc, 174)
-gmsh.model.geo.addPoint(L, -(0.5 * Sh + tt + t_ag), 0, lc, 175)
-gmsh.model.geo.addPoint(0, -(0.5 * Sh + tt + t_ag), 0, lc, 176)
+gmsh.model.geo.addPoint(0, 0.5 * Sh + tt + 0.5 * t_ag, 0, lc, 173)
+gmsh.model.geo.addPoint(L, 0.5 * Sh + tt + 0.5 * t_ag, 0, lc, 174)
+gmsh.model.geo.addPoint(L, -(0.5 * Sh + tt + 0.5 * t_ag), 0, lc, 175)
+gmsh.model.geo.addPoint(0, -(0.5 * Sh + tt + 0.5 * t_ag), 0, lc, 176)
 
 gmsh.model.geo.addLine(1, 2, 1)
 gmsh.model.geo.addLine(2, 149, 2)
@@ -694,7 +695,20 @@ gmsh.model.geo.addPlaneSurface([38], 38)
 gmsh.model.geo.addPlaneSurface([39], 39)
 
 gmsh.model.geo.synchronize()
+
+# Define the number of points along the airgap interface
+gmsh.model.mesh.setTransfiniteCurve(213, npts_airgap)
+gmsh.model.mesh.setTransfiniteCurve(209, npts_airgap)
+
 gmsh.model.mesh.generate(2)
+
+
+# Check the number of tags along the edge matches npts_airgap
+# nodeTags_213, _, _ = gmsh.model.mesh.getNodes(1, 213, includeBoundary=True)
+# nodeTags_209, _, _ = gmsh.model.mesh.getNodes(1, 213, includeBoundary=True)
+# print(len(nodeTags_213), len(nodeTags_209))
+# quit()
+
 
 # Check the areas to make sure elements are not flipped
 nodeTags, X, _ = gmsh.model.mesh.getNodes(-1, -1)

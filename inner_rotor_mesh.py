@@ -14,6 +14,7 @@ Ls = (L - 10 * Lm) / 10  # space between magnets
 t = 1.0  # Thickness of the rotor back iron
 tm = 1.0  # Thickness of the magnet
 t_ag = 2  # airgap thickness
+npts_airgap = 100
 
 # Magnet 1
 start = 0.5 * Ls
@@ -60,8 +61,8 @@ gmsh.model.geo.addPoint(start + 8 * Lm + 8 * Ls, t + tm, 0, lc, 39)
 gmsh.model.geo.addPoint(start + 9 * Lm + 8 * Ls, t + tm, 0, lc, 40)
 gmsh.model.geo.addPoint(start + 9 * Lm + 9 * Ls, t + tm, 0, lc, 41)
 gmsh.model.geo.addPoint(start + 10 * Lm + 9 * Ls, t + tm, 0, lc, 42)
-gmsh.model.geo.addPoint(L, t + 0.5 * t_ag + tm * 0.5, 0, lc, 43)
-gmsh.model.geo.addPoint(0, t + 0.5 * t_ag + tm * 0.5, 0, lc, 44)
+gmsh.model.geo.addPoint(L, t + 0.5 * t_ag + tm, 0, lc, 43)
+gmsh.model.geo.addPoint(0, t + 0.5 * t_ag + tm, 0, lc, 44)
 gmsh.model.geo.addPoint(0, 0, 0, lc, 45)
 gmsh.model.geo.addPoint(L, 0, 0, lc, 46)
 
@@ -233,7 +234,16 @@ gmsh.model.geo.addPlaneSurface([12], 12)
 
 gmsh.model.geo.synchronize()
 
+# Define number of points along the airgap interface
+gmsh.model.mesh.setTransfiniteCurve(53, npts_airgap)
+
 gmsh.model.mesh.generate(2)
+
+# Check the number of tags along the edge matches npts_airgap
+# nodeTags_53, _, _ = gmsh.model.mesh.getNodes(1, 53, includeBoundary=True)
+# print(nodeTags_53)
+# print(len(nodeTags_53))
+# quit()
 
 # Check the areas to make sure elements are not flipped
 nodeTags, X, _ = gmsh.model.mesh.getNodes(-1, -1)
