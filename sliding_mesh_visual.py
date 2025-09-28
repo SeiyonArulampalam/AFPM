@@ -32,7 +32,13 @@ def plot_region(ax, X, conn_list, color, label=None):
     return
 
 
-def plot_full_motor(
+def plot_edge(ax, X, node_tags, color, linestyle="-"):
+    coords = X[node_tags, :]  # Extract x, y, z coordinates
+    ax.plot(coords[:, 0], coords[:, 1], color=color, linewidth=0.5, linestyle=linestyle)
+    return
+
+
+def plot_motor(
     total_length,
     airgap,
     copper_slot_height,
@@ -134,10 +140,45 @@ def plot_full_motor(
     stator_conn_ag_inner = parser_stator.get_conn("SURFACE39", "CPS3")
     stator_conn_ag_outter = parser_stator.get_conn("SURFACE38", "CPS3")
 
-    # Line on the left edge of the stator
-    # Line on the right edge of the stator
-    # Line on the top edge of the stator
+    # Line on the left edge of the stator (goes from bottom to top)
+    stator_conn_left_edge1 = parser_stator.get_conn("LINE212", "T3D2")
+    stator_conn_left_edge2 = parser_stator.get_conn("LINE97", "T3D2")
+    stator_conn_left_edge3 = parser_stator.get_conn("LINE211", "T3D2")
+    stator_conn_pbc_left = np.concatenate(
+        (
+            stator_conn_left_edge1.flatten(),
+            stator_conn_left_edge2.flatten(),
+            stator_conn_left_edge3.flatten(),
+        ),
+        axis=None,
+    )
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    stator_pbc_nodes_left = np.array(list(dict.fromkeys(stator_conn_pbc_left)))
+
+    # Line on the right edge of the stator (goes from bottom to top)
+    stator_conn_right_edge1 = parser_stator.get_conn("LINE214", "T3D2")
+    stator_conn_right_edge2 = parser_stator.get_conn("LINE122", "T3D2")
+    stator_conn_right_edge3 = parser_stator.get_conn("LINE210", "T3D2")
+    stator_conn_pbc_right = np.concatenate(
+        (
+            stator_conn_right_edge1.flatten(),
+            stator_conn_right_edge2.flatten(),
+            stator_conn_right_edge3.flatten(),
+        ),
+        axis=None,
+    )
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    stator_pbc_nodes_right = np.array(list(dict.fromkeys(stator_conn_pbc_right)))
+
+    # Line on the top edge of the stator (oriented from left to right)
+    stator_conn_top_edge = parser_stator.get_conn("LINE209", "T3D2")
+    stator_pbc_nodes_top = np.array(list(dict.fromkeys(stator_conn_top_edge.flatten())))
+
     # Line on the bottom edge of the stator
+    stator_conn_bottom_edge = parser_stator.get_conn("LINE213", "T3D2")
+    stator_pbc_nodes_bottom = np.array(
+        list(dict.fromkeys(stator_conn_bottom_edge.flatten()))
+    )
 
     #######################################
     # Outter rotor connectivity information
@@ -161,6 +202,46 @@ def plot_full_motor(
     # Get the airgap connectivity
     outter_rotor_conn_airgap = parser_outter_rotor.get_conn("SURFACE12", "CPS3")
 
+    # Line on the left edge
+    outter_rotor_left_edge1 = parser_outter_rotor.get_conn("LINE54", "T3D2")
+    outter_rotor_left_edge2 = parser_outter_rotor.get_conn("LINE55", "T3D2")
+    outter_rotor_conn_pbc_left = np.concatenate(
+        (outter_rotor_left_edge1.flatten(), outter_rotor_left_edge2.flatten()), axis=0
+    )
+
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    # Oriented from bottom to top
+    outter_rotor_pbc_nodes_left = np.array(
+        list(dict.fromkeys(outter_rotor_conn_pbc_left))
+    )
+
+    # Line of the right edge
+    outter_rotor_right_edge1 = parser_outter_rotor.get_conn("LINE57", "T3D2")
+    outter_rotor_right_edge2 = parser_outter_rotor.get_conn("LINE52", "T3D2")
+    outter_rotor_conn_pbc_right = np.concatenate(
+        (outter_rotor_right_edge1.flatten(), outter_rotor_right_edge2.flatten()), axis=0
+    )
+
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    # Oriented from bottom to top
+    outter_rotor_pbc_nodes_right = np.array(
+        list(dict.fromkeys(outter_rotor_conn_pbc_right))
+    )
+
+    # Need to flip to make the orientation from bottom to top
+    outter_rotor_pbc_nodes_right = np.flip(outter_rotor_pbc_nodes_right)
+
+    # Line on the top and bottom edges
+    outter_rotor_top_edge = parser_outter_rotor.get_conn("LINE56", "T3D2")
+    outter_rotor_bottom_edge = parser_outter_rotor.get_conn("LINE53", "T3D2")
+    outter_rotor_dirichlet_nodes = np.array(
+        list(dict.fromkeys(outter_rotor_top_edge.flatten()))
+    )  # Left to right
+    outter_rotor_pbc_nodes_bottom = np.array(
+        list(dict.fromkeys(outter_rotor_bottom_edge.flatten()))
+    )
+    outter_rotor_pbc_nodes_bottom = np.flip(outter_rotor_pbc_nodes_bottom)
+
     ######################################
     # Inner rotor connectivity information
     ######################################
@@ -182,6 +263,52 @@ def plot_full_motor(
 
     # Get the airgap connectivity
     inner_rotor_conn_airgap = parser_inner_rotor.get_conn("SURFACE12", "CPS3")
+
+    # Line on the left edge
+    inner_rotor_left_edge1 = parser_inner_rotor.get_conn("LINE54", "T3D2")
+    inner_rotor_left_edge2 = parser_inner_rotor.get_conn("LINE55", "T3D2")
+    inner_rotor_conn_pbc_left = np.concatenate(
+        (inner_rotor_left_edge1.flatten(), inner_rotor_left_edge2.flatten()), axis=0
+    )
+
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    # Oriented from bottom to top
+    inner_rotor_pbc_nodes_left = np.array(
+        list(dict.fromkeys(inner_rotor_conn_pbc_left))
+    )
+    inner_rotor_pbc_nodes_left = np.flip(inner_rotor_pbc_nodes_left)
+
+    # Line of the right edge
+    inner_rotor_right_edge1 = parser_inner_rotor.get_conn("LINE57", "T3D2")
+    inner_rotor_right_edge2 = parser_inner_rotor.get_conn("LINE52", "T3D2")
+    inner_rotor_conn_pbc_right = np.concatenate(
+        (inner_rotor_right_edge1.flatten(), inner_rotor_right_edge2.flatten()), axis=0
+    )
+
+    # Turn into a single unique list of nodes preserving the order from bottom to top
+    # Oriented from bottom to top
+    inner_rotor_pbc_nodes_right = np.array(
+        list(dict.fromkeys(inner_rotor_conn_pbc_right))
+    )
+
+    # Line on the top and bottom edges
+    inner_rotor_bottom_edge = parser_inner_rotor.get_conn("LINE56", "T3D2")
+    inner_rotor_top_edge = parser_inner_rotor.get_conn("LINE53", "T3D2")
+    inner_rotor_dirichlet_nodes = np.array(
+        list(dict.fromkeys(inner_rotor_bottom_edge.flatten()))
+    )  # Left to right
+    inner_rotor_pbc_nodes_top = np.array(
+        list(dict.fromkeys(inner_rotor_top_edge.flatten()))
+    )
+
+    inner_rotor_pbc_nodes_top = np.flip(inner_rotor_pbc_nodes_top)
+
+    #############################
+    # Interface node connectivity
+    #############################
+
+    #####################################################################################
+    #####################################################################################
 
     # Create figure
     fig, ax = plt.subplots(figsize=(8, 2))
@@ -245,6 +372,12 @@ def plot_full_motor(
     airgap_conns = [stator_conn_ag_inner, stator_conn_ag_outter]
     plot_region(ax, X_stator, airgap_conns, color="#7BE7FF", label="Airgap")
 
+    # Plot the PBC edges
+    plot_edge(ax, X_stator, stator_pbc_nodes_left, color="#AAFF00")
+    plot_edge(ax, X_stator, stator_pbc_nodes_right, color="#0077FF")
+    plot_edge(ax, X_stator, stator_pbc_nodes_bottom[-slide_number:-1], color="#FF006A")
+    plot_edge(ax, X_stator, stator_pbc_nodes_top[-slide_number:-1], color="#00FFD5")
+
     ###############################
     # Plot the Outter Rotor Regions
     ###############################
@@ -292,6 +425,21 @@ def plot_full_motor(
     # Plot the airgap region for the outter rotor
     plot_region(
         ax, X_outter_rotor, [outter_rotor_conn_airgap], color="#7BE7FF", label="Airgap"
+    )
+
+    # Plot the left and right edge pbc
+    plot_edge(ax, X_outter_rotor, outter_rotor_pbc_nodes_left[:-1], color="#88FF7B")
+    plot_edge(ax, X_outter_rotor, outter_rotor_pbc_nodes_right[:-1], color="#9A7BFF")
+
+    # Plot the dirichlet bc edge
+    plot_edge(ax, X_outter_rotor, outter_rotor_dirichlet_nodes, color="#2B19E9")
+
+    # Plot the airgap pbc
+    plot_edge(
+        ax,
+        X_outter_rotor,
+        outter_rotor_pbc_nodes_bottom[1:slide_number],
+        color="#8041BF",
     )
 
     ##############################
@@ -347,17 +495,62 @@ def plot_full_motor(
         label="Airgap",
     )
 
+    # Plot the left and right edge pbc
+    plot_edge(ax, X_inner_rotor, inner_rotor_pbc_nodes_left[1:], color="#FFB07B")
+    plot_edge(ax, X_inner_rotor, inner_rotor_pbc_nodes_right[1:], color="#FB7BFF")
+
+    # Plot the dirichlet bc edge
+    plot_edge(ax, X_inner_rotor, inner_rotor_dirichlet_nodes, color="#2CB0FC")
+
+    # Plot the airgap pbc edge
+    plot_edge(
+        ax, X_inner_rotor, inner_rotor_pbc_nodes_top[1:slide_number], color="#BF4141"
+    )
+
+    ###################################
+    # Plot the overlapped airgap region
+    ###################################
+    plot_edge(
+        ax,
+        X_stator,
+        stator_pbc_nodes_top[1 : -slide_number - 1],
+        color="#246317",
+        linestyle="-",
+    )
+    plot_edge(
+        ax,
+        X_stator,
+        stator_pbc_nodes_bottom[1 : -slide_number - 1],
+        color="#63175F",
+        linestyle="-",
+    )
+
+    plot_edge(
+        ax,
+        X_outter_rotor,
+        outter_rotor_pbc_nodes_bottom[slide_number + 1 : -1],
+        color="#FBFF00",
+        linestyle=":",
+    )
+    plot_edge(
+        ax,
+        X_inner_rotor,
+        inner_rotor_pbc_nodes_top[slide_number + 1 : -1],
+        color="#FF008C",
+        linestyle=":",
+    )
+
     # Formatting
     # ax.set_aspect("equal")
     # ax.legend()
-    ax.set_xlim(0, 2 * total_length)
+    ax.set_xlim(-1, 2 * total_length)
     ylim = (
         0.5 * copper_slot_height
         + tooth_tip_thickness
         + airgap
         + magnet_thickness
         + back_iron_thickness
-    )
+    ) + 1
     ax.set_ylim(-ylim, ylim)
     ax.set_aspect("equal")
     ax.axis("off")
@@ -378,7 +571,7 @@ def create_gif():
 
     image_paths = [os.path.join(folder, img) for img in images]
     output_gif = os.path.join(
-        "/Users/seiyonarulampalam/git/AFPM/Animations", "sliding_mesh.gif"
+        "/Users/seiyonarulampalam/git/AFPM/Animations", "sliding_mesh_bc.gif"
     )
 
     imageio.mimsave(
@@ -388,22 +581,23 @@ def create_gif():
 
 
 # Generate a plot for each slide number
-# for i in range(0, 100, 1):
-#     # Loop through each slide number
-#     plot_full_motor(
-#         total_length=36.0,
-#         airgap=1.0,
-#         copper_slot_height=4.0,
-#         tooth_tip_thickness=1.0,
-#         bell_width=2.5,
-#         tooth_width=1.5,
-#         magnet_length=3.0,
-#         magnet_thickness=2,
-#         back_iron_thickness=1.0,
-#         mesh_refinement=2e-1,
-#         npts_airgap=100,
-#         slide_number=i,
-#     )
+for i in range(0, 100, 1):
+    # Loop through each slide number
+    plot_motor(
+        total_length=36.0,
+        airgap=1.0,
+        copper_slot_height=4.0,
+        tooth_tip_thickness=1.0,
+        bell_width=2.5,
+        tooth_width=1.5,
+        magnet_length=3.0,
+        magnet_thickness=2,
+        back_iron_thickness=1.0,
+        mesh_refinement=2e-1,
+        npts_airgap=100,
+        slide_number=i,
+    )
+
 
 # Create the gif
 create_gif()
