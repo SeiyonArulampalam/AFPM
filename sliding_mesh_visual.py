@@ -55,7 +55,7 @@ def plot_full_motor(
     # Define the offset to slide the stator mesh to the right
     if slide_number > npts_airgap:
         raise Exception("Slide number excedes npts in airgap")
-    slide_offset = (total_length / npts_airgap) * slide_number
+    slide_offset = (total_length / (npts_airgap - 1)) * slide_number
 
     # Define the filenames for the mesh
     fname_stator = "stator.inp"
@@ -134,6 +134,11 @@ def plot_full_motor(
     stator_conn_ag_inner = parser_stator.get_conn("SURFACE39", "CPS3")
     stator_conn_ag_outter = parser_stator.get_conn("SURFACE38", "CPS3")
 
+    # Line on the left edge of the stator
+    # Line on the right edge of the stator
+    # Line on the top edge of the stator
+    # Line on the bottom edge of the stator
+
     #######################################
     # Outter rotor connectivity information
     #######################################
@@ -178,10 +183,12 @@ def plot_full_motor(
     # Get the airgap connectivity
     inner_rotor_conn_airgap = parser_inner_rotor.get_conn("SURFACE12", "CPS3")
 
-    # Plot the regions of the motor
     # Create figure
     fig, ax = plt.subplots(figsize=(8, 2))
 
+    #########################
+    # Plot the Stator Regions
+    #########################
     # Plot slots (left half) (orange)
     slot_conns_left_half = [
         stator_conn_s1,
@@ -238,6 +245,9 @@ def plot_full_motor(
     airgap_conns = [stator_conn_ag_inner, stator_conn_ag_outter]
     plot_region(ax, X_stator, airgap_conns, color="#7BE7FF", label="Airgap")
 
+    ###############################
+    # Plot the Outter Rotor Regions
+    ###############################
     # Plot the magnets for the outter rotor (set1)
     outter_rotor_magnets_conn_set1 = [
         outter_rotor_conn_m1,
@@ -284,6 +294,9 @@ def plot_full_motor(
         ax, X_outter_rotor, [outter_rotor_conn_airgap], color="#7BE7FF", label="Airgap"
     )
 
+    ##############################
+    # Plot the Inner Rotor Regions
+    ##############################
     # Plot the magnets for the inner rotor (set1)
     inner_rotor_magnets_conn_set1 = [
         inner_rotor_conn_m1,
@@ -364,26 +377,33 @@ def create_gif():
     images = sorted(images, key=lambda x: int(os.path.splitext(x)[0]))
 
     image_paths = [os.path.join(folder, img) for img in images]
-    output_gif = os.path.join(folder, "sliding_mesh.gif")
+    output_gif = os.path.join(
+        "/Users/seiyonarulampalam/git/AFPM/Animations", "sliding_mesh.gif"
+    )
 
     imageio.mimsave(
         output_gif, [imageio.imread(img) for img in image_paths], duration=0.5
     )
+    return
 
 
-for i in range(0, 100, 1):
-    plot_full_motor(
-        total_length=36.0,
-        airgap=1.0,
-        copper_slot_height=4.0,
-        tooth_tip_thickness=1.0,
-        bell_width=2.5,
-        tooth_width=1.5,
-        magnet_length=3.0,
-        magnet_thickness=2,
-        back_iron_thickness=1.0,
-        mesh_refinement=2e-1,
-        npts_airgap=100,
-        slide_number=i,
-    )
+# Generate a plot for each slide number
+# for i in range(0, 100, 1):
+#     # Loop through each slide number
+#     plot_full_motor(
+#         total_length=36.0,
+#         airgap=1.0,
+#         copper_slot_height=4.0,
+#         tooth_tip_thickness=1.0,
+#         bell_width=2.5,
+#         tooth_width=1.5,
+#         magnet_length=3.0,
+#         magnet_thickness=2,
+#         back_iron_thickness=1.0,
+#         mesh_refinement=2e-1,
+#         npts_airgap=100,
+#         slide_number=i,
+#     )
+
+# Create the gif
 create_gif()
