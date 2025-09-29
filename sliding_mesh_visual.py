@@ -373,10 +373,20 @@ def plot_motor(
     plot_region(ax, X_stator, airgap_conns, color="#7BE7FF", label="Airgap")
 
     # Plot the PBC edges
-    plot_edge(ax, X_stator, stator_pbc_nodes_left, color="#AAFF00")
+    plot_edge(ax, X_stator, stator_pbc_nodes_left, color="#FF00F2")
     plot_edge(ax, X_stator, stator_pbc_nodes_right, color="#0077FF")
-    plot_edge(ax, X_stator, stator_pbc_nodes_bottom[-slide_number:-1], color="#FF006A")
-    plot_edge(ax, X_stator, stator_pbc_nodes_top[-slide_number:-1], color="#00FFD5")
+    plot_edge(
+        ax,
+        X_stator,
+        stator_pbc_nodes_bottom[-slide_number:-1] if slide_number > 0 else [],
+        color="#FF006A",
+    )
+    plot_edge(
+        ax,
+        X_stator,
+        stator_pbc_nodes_top[-slide_number:-1] if slide_number > 0 else [],
+        color="#00FFD5",
+    )
 
     ###############################
     # Plot the Outter Rotor Regions
@@ -428,8 +438,26 @@ def plot_motor(
     )
 
     # Plot the left and right edge pbc
-    plot_edge(ax, X_outter_rotor, outter_rotor_pbc_nodes_left[:-1], color="#88FF7B")
-    plot_edge(ax, X_outter_rotor, outter_rotor_pbc_nodes_right[:-1], color="#9A7BFF")
+    plot_edge(
+        ax,
+        X_outter_rotor,
+        (
+            outter_rotor_pbc_nodes_left[:-1]
+            if slide_number > 0
+            else outter_rotor_pbc_nodes_left[1:-1]
+        ),
+        color="#88FF7B",
+    )
+    plot_edge(
+        ax,
+        X_outter_rotor,
+        (
+            outter_rotor_pbc_nodes_right[:-1]
+            if slide_number > 0
+            else outter_rotor_pbc_nodes_right[1:-1]
+        ),
+        color="#9A7BFF",
+    )
 
     # Plot the dirichlet bc edge
     plot_edge(ax, X_outter_rotor, outter_rotor_dirichlet_nodes, color="#2B19E9")
@@ -496,8 +524,26 @@ def plot_motor(
     )
 
     # Plot the left and right edge pbc
-    plot_edge(ax, X_inner_rotor, inner_rotor_pbc_nodes_left[1:], color="#FFB07B")
-    plot_edge(ax, X_inner_rotor, inner_rotor_pbc_nodes_right[1:], color="#FB7BFF")
+    plot_edge(
+        ax,
+        X_inner_rotor,
+        (
+            inner_rotor_pbc_nodes_left[1:]
+            if slide_number > 0
+            else inner_rotor_pbc_nodes_left[1:-1]
+        ),
+        color="#FFB07B",
+    )
+    plot_edge(
+        ax,
+        X_inner_rotor,
+        (
+            inner_rotor_pbc_nodes_right[1:]
+            if slide_number > 0
+            else inner_rotor_pbc_nodes_right[1:-1]
+        ),
+        color="#FB7BFF",
+    )
 
     # Plot the dirichlet bc edge
     plot_edge(ax, X_inner_rotor, inner_rotor_dirichlet_nodes, color="#2CB0FC")
