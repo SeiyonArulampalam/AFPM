@@ -446,7 +446,7 @@ def plot_motor(
             if slide_number > 0
             else outter_rotor_pbc_nodes_left[1:-1]
         ),
-        color="#88FF7B",
+        color="#FF6200",
     )
     plot_edge(
         ax,
@@ -466,7 +466,7 @@ def plot_motor(
     plot_edge(
         ax,
         X_outter_rotor,
-        outter_rotor_pbc_nodes_bottom[1:slide_number],
+        outter_rotor_pbc_nodes_bottom[1:slide_number] if slide_number > 0 else [],
         color="#8041BF",
     )
 
@@ -550,7 +550,10 @@ def plot_motor(
 
     # Plot the airgap pbc edge
     plot_edge(
-        ax, X_inner_rotor, inner_rotor_pbc_nodes_top[1:slide_number], color="#BF4141"
+        ax,
+        X_inner_rotor,
+        inner_rotor_pbc_nodes_top[1:slide_number] if slide_number > 0 else [],
+        color="#BF4141",
     )
 
     ###################################
